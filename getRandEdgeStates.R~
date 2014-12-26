@@ -1,0 +1,34 @@
+library(phangorn)
+library(phytools)
+
+getRandEdgeStates <- function(transformedtree, tipstates, N = 100){
+		  
+		  ancmat <- suppressWarnings(fastAnc(transformedtree, tipstates))
+		  for(i in 1:N){
+		  
+			newtips <- sample(tipstates, length(tipstates))
+			names(newtips) <- names(tipstates)
+			ancmat <- rbind(ancmat, suppressWarnings(fastAnc(transformedtree, newtips)))
+			if(i %% 10 == 0) print(paste("done ancestral reconstruction", i))
+		  
+		  }
+		  
+		  ancmat <- as.matrix(ancmat)
+		  
+		  getpval <- function(ancmatcol){
+		  	  est <- ancmatcol[1]
+		  	  rand <- ancmatcol[2:length(ancmatcol)]
+			  pval <- length(rand[which(rand < est)]) / N
+			  ## The next line is a standardization assuming normal distribution
+			  ## standstate <- (est - mean(rand)) / sd(rand); return(standstate)
+			  return(pval)
+
+		  }
+		  pvals <- apply(ancmat, 2, getpval)
+		  
+		  ancmat <- rbind(ancmat[1,], pvals)
+
+		  return(ancmat)
+		  
+
+}

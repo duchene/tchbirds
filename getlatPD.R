@@ -1,0 +1,26 @@
+require(picante)
+require(geiger)
+require(phytools)
+
+# This function produces the phylogenetic diversity values for each bin of latitude. The phylogeny and species latitudes must be given.
+
+bins <- bins <- c(-90, seq(-50, 70, 10), 90)
+
+latbins <- cut(birlats, bins, labels = F)
+
+getlatPD <- function(tree, lats, bins, N = 1000){
+	 
+	 latmat <- matrix(0, ncol = length(lats), nrow = length(unique(bins)))
+	 colnames(latmat) <- names(lats)
+	 rownames(latmat) <- 1:length(unique(bins))
+	 for(i in 1:length(unique(bins))){
+	       latmat[i, which(bins == i)] <- 1
+	 }
+
+	 PDz <- ses.pd(latmat, tree, "taxa.labels", runs = N, iterations = N)
+
+	 PDz <- PDz[, c("ntaxa", "pd.obs.z", "pd.obs.p")]
+
+	 return(PDz)
+
+}

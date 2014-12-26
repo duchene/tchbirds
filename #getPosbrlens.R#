@@ -1,0 +1,31 @@
+require(ape)
+
+# Many branch l
+
+getPosbrlens <- function(phy){
+
+while(any(phy$edge.length < 0)){
+
+    # the bad edges
+    bad <- which(phy$edge.length < 0)
+
+    for(i in bad){
+      	  newmin <- 0.0000001
+      	  total_d <- abs(phy$edge.length[i]) + newmin
+
+      	  # New bad branch
+      	  phy$edge.length[i] <- phy$edge.length[i] + total_d
+
+      	  #children of the bad node:
+      	  children <- which(phy$edge[,1] == phy$edge[i,2])
+
+      	  # adjust the children edges by subtracting total displacement
+      	  phy$edge.length[children] <- phy$edge.length[children] - total_d
+
+      }
+
+}
+
+return(phy)
+
+}
